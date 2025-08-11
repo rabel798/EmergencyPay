@@ -29,7 +29,7 @@ git clone https://github.com/rabel798/EmergencyPay
 
 ## **🐍 Step 2: Setup Python Environment**
 python -m venv myenv
-myenv\Scripts\activate         # For Windows
+<br>myenv\Scripts\activate         # For Windows
 ### OR
 source myenv/bin/activate      # For macOS/Linux
 
@@ -43,7 +43,6 @@ pip install -r requirements.txt
 ## **⚙ Step 4: Create .env File**
 In the project root directory, create a .env file and add the following environment variables:
 
-env
 ### Flask session secret
 - SESSION_SECRET=3cWsjk7sOu8FH4zkLvn8j5OltsezQVOBfRSPFEr5RKPR+U0gzpWE+ggLorxFejynvkSvj2tBJ8UsIqtZqng2xg==
 
@@ -98,19 +97,19 @@ env
 
 # **🗂️ Project Structure**
 
-- EmergencyPay/
-- ├── client/                    # React frontend
-- │   ├── src/
-- │   │   ├── components/        # Reusable UI components
-- │   │   ├── pages/            # Application pages
-- │   │   ├── context/          # State management
-- │   │   └── lib/              # Utilities and services
-- ├── server/                   # Node.js wrapper for compatibility
-- ├── app.py                    # Main Flask application
-- ├── database.db              # SQLite database (auto-created)
-- ├── requirements.txt          # Python dependencies
-- ├── package.json             # Node.js dependencies
-- └── .env                     # Environment variables (create this)
+ EmergencyPay/
+ <br> ├── client/                    # React frontend
+ <br> │   ├── src/
+ <br> │   │   ├── components/        # Reusable UI components
+ <br> │   │   ├── pages/            # Application pages
+ <br> │   │   ├── context/          # State management
+ <br> │   │   └── lib/              # Utilities and services
+ <br> ├── server/                   # Node.js wrapper for compatibility
+ <br> ├── app.py                    # Main Flask application
+ <br> ├── database.db              # SQLite database (auto-created)
+ <br> ├── requirements.txt          # Python dependencies
+ <br> ├── package.json             # Node.js dependencies
+ <br> └── .env                     # Environment variables (create this)
 
 # **🔄 Data Flow**
 
@@ -202,17 +201,17 @@ env
   printenv | grep -E "(SESSION_SECRET|DATABASE_URL|PG)"
 
 ### Test database connection:
-  - python -c 
-  - "
-  - import os
-  - import psycopg2
-  - try:
-  -    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-  -    print('✓ Database connection successful')
-  -    conn.close()
-  - except Exception as e:
-  -    print(f'✗ Database connection failed: {e}')
-  - "
+python -c 
+<br> "
+<br> import os
+<br> import psycopg2
+<br> try:
+    <br> conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    <br> print('✓ Database connection successful')
+    <br> conn.close()
+<br> except Exception as e:
+    <br> print(f'✗ Database connection failed: {e}')
+<br> "
 
 # **📄 License**
 MIT License - see LICENSE file for details
