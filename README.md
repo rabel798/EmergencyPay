@@ -25,7 +25,7 @@ EmergencyPay is a React-based web application that simulates an offline payment 
 
 ## **🧱 Step 1: Clone the Repository**
 git clone https://github.com/rabel798/EmergencyPay
-cd emergencypay
+<br> cd emergencypay
 
 ## **🐍 Step 2: Setup Python Environment**
 python -m venv myenv
