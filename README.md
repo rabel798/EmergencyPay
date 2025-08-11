@@ -23,60 +23,60 @@ EmergencyPay is a React-based web application that simulates an offline payment 
 
 # **🚀 Quick Start**
 
-## **🧱 Step 1: Clone the Repository**
-git clone https://github.com/rabel798/EmergencyPay
-<br> cd emergencypay
+    ## **🧱 Step 1: Clone the Repository**
+    git clone https://github.com/rabel798/EmergencyPay
+    <br> cd emergencypay
 
-## **🐍 Step 2: Setup Python Environment**
-python -m venv myenv
-<br>myenv\Scripts\activate         # For Windows
-### OR
-source myenv/bin/activate      # For macOS/Linux
+    ## **🐍 Step 2: Setup Python Environment**
+    python -m venv myenv
+    <br>myenv\Scripts\activate         # For Windows
+    ### OR
+    source myenv/bin/activate      # For macOS/Linux
 
-## **📦 Step 3: Install Dependencies**
-### Install Node (Frontend) dependencies:
-npm install
+    ## **📦 Step 3: Install Dependencies**
+    ### Install Node (Frontend) dependencies:
+    npm install
 
-### Install Python (Backend) dependencies:
-pip install -r requirements.txt
+    ### Install Python (Backend) dependencies:
+    pip install -r requirements.txt
 
-## **⚙ Step 4: Create .env File**
-In the project root directory, create a .env file and add the following environment variables:
+    ## **⚙ Step 4: Create .env File**
+    In the project root directory, create a .env file and add the following environment variables:
 
-### Flask session secret
-- SESSION_SECRET=3cWsjk7sOu8FH4zkLvn8j5OltsezQVOBfRSPFEr5RKPR+U0gzpWE+ggLorxFejynvkSvj2tBJ8UsIqtZqng2xg==
+    ### Flask session secret
+    - SESSION_SECRET=3cWsjk7sOu8FH4zkLvn8j5OltsezQVOBfRSPFEr5RKPR+U0gzpWE+ggLorxFejynvkSvj2tBJ8UsIqtZqng2xg==
 
-### Server config
-  - PORT=3000
-  - FLASK_ENV=development
-  - FLASK_DEBUG=true
+     ### Server config
+      - PORT=3000
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
 
-### PostgreSQL database config
-  - DATABASE_URL=postgresql://neondb_owner:npg_m0JGs4tCgoTe@ep-tiny-fog-a6wso9s2.us-west-2.aws.neon.tech/neondb?sslmode=require
-  - PGDATABASE=neondb
-  - PGHOST=ep-tiny-fog-a6wso9s2.us-west-2.aws.neon.tech
-  - PGPORT=5432
-  - PGUSER=neondb_owner
-  - PGPASSWORD=npg_m0JGs4tCgoTe
+    ### PostgreSQL database config
+      - DATABASE_URL=postgresql://neondb_owner:npg_m0JGs4tCgoTe@ep-tiny-fog-a6wso9s2.us-west-2.aws.neon.tech/neondb?sslmode=require
+      - PGDATABASE=neondb
+      - PGHOST=ep-tiny-fog-a6wso9s2.us-west-2.aws.neon.tech
+      - PGPORT=5432
+      - PGUSER=neondb_owner
+      - PGPASSWORD=npg_m0JGs4tCgoTe
 
-## **🏃‍♂ Step 5: Run the Application**
-### Build frontend and run everything (Production mode):
-  - npm run build      # Builds the frontend
-  - python app.py      # Starts the Flask backend
+    ## **🏃‍♂ Step 5: Run the Application**
+    ### Build frontend and run everything (Production mode):
+      - npm run build      # Builds the frontend
+      - python app.py      # Starts the Flask backend
 
-### OR run in development mode:
-   npm start
+    ### OR run in development mode:
+       npm start
 
-### OR run Flask directly:
-   python app.py
+    ### OR run Flask directly:
+       python app.py
 
-# **🌐 Access the Application**
-  - Development: http://localhost:3000
-  - The app will build the frontend and start the Flask server
+  # **🌐 Access the Application**
+      - Development: http://localhost:3000
+      - The app will build the frontend and start the Flask server
  
-# **📱 Key Features:**
+    # **📱 Key Features:**
 
-## 🌐 Connection Management
+ ## 🌐 Connection Management
   - **Online Mode**: Real-time UPI-like transactions
   - **Offline Mode**: Bluetooth-simulated peer-to-peer payments
   - **Emergency Mode**: Special offline capabilities for essential services
