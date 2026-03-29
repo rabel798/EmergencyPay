@@ -277,6 +277,6 @@ io.on('connection', (socket) => {
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
-httpServer.listen(PORT, 'localhost', () => {
-  console.log(`EmergencyPay server running on http://localhost:${PORT}`);
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`EmergencyPay server running on http://0.0.0.0:${PORT}`);
 });
