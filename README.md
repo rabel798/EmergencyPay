@@ -1,16 +1,17 @@
-# **EmergencyPay - Offline UPI Payment System**
+# **EmergencyPay - Offline Payment System with Stablecoin Transactions**
 
 ## **Overview**
 
-EmergencyPay is a React-based web application that simulates an offline payment system designed to work during UPI outages in India. The system provides both merchant and customer interfaces with offline transaction capabilities using simulated Bluetooth Low Energy for device-to-device payments.
+EmergencyPay is a React-based web application that enables offline payments with real stablecoin support during network outages. The system provides both merchant and customer interfaces with offline transaction capabilities, stablecoin conversion (with real-time exchange rates), and device-to-device payments using simulated Bluetooth.
 
 # **🏗️ System Architecture**
 
 ## **Backend**
-- **Runtime**: Python 3.11 with Flask framework
-- **Database**: SQLite with PostgreSQL support
-- **Real-time Communication**: Flask-SocketIO for live updates
-- **Session Management**: Flask sessions with secure session secrets
+- **Runtime**: Node.js with Express.js framework
+- **Database**: SQLite with better-sqlite3 driver
+- **Real-time Communication**: Socket.IO for live updates
+- **External APIs**: CoinGecko for real-time stablecoin prices
+- **Authentication**: Firebase Auth (optional, configurable)
 
 ## **Frontend**
 - **Framework**: React 18 with TypeScript
@@ -21,33 +22,56 @@ EmergencyPay is a React-based web application that simulates an offline payment 
 - **Data Fetching**: TanStack Query for server state management
 - **Animations**: Framer Motion for smooth transitions
 
+## **💎 Stablecoin Features**
+- **Real Stablecoins Supported**: USDC, USDT, DAI, EURC, and more
+- **Real-time Pricing**: CoinGecko API (free, no key required)
+- **Multi-currency Support**: Convert between 100+ fiat currencies
+- **Zero Conversion Fees**: No charges on conversions
+- **Persistent Storage**: SQLite database (not Firebase)
+- **Offline Capability**: Queue transactions during outages, sync when online
+
 # **🚀 Quick Start**
- ## **🧱 Step 1: Clone the Repository**
-    git clone https://github.com/rabel798/EmergencyPay
-    cd emergencypay
- ## **🐍 Step 2: Setup Python Environment**
-    python -m venv myenv
-    myenv\Scripts\activate         # For Windows
-   ### OR
-    source myenv/bin/activate      # For macOS/Linux
 
- ## **📦 Step 3: Install Dependencies**
-  ### Install Node (Frontend) dependencies:
-    npm install
+## **🧱 Step 1: Clone the Repository**
+```bash
+git clone https://github.com/rabel798/EmergencyPay
+cd EmergencyPay
+```
 
-  ### Install Python (Backend) dependencies:
-    pip install -r requirements.txt
+## **📦 Step 2: Install Dependencies**
+```bash
+npm install
+```
 
- ## **⚙ Step 4: Create .env File**
-   In the project root directory, create a .env file and add the following environment variables:
+## **⚙ Step 3: Create .env File**
+In the project root directory, create a `.env` file:
 
-   ### Flask session secret
-    - SESSION_SECRET=3cWsjk7sOu8FH4zkLvn8j5OltsezQVOBfRSPFEr5RKPR+U0gzpWE+ggLorxFejynvkSvj2tBJ8UsIqtZqng2xg==
+```env
+# Server config
+PORT=3000
 
-   ### Server config
-      - PORT=3000
-      - FLASK_ENV=development
-      - FLASK_DEBUG=true
+# Firebase (Optional - leave empty to skip Firebase auth)
+VITE_FIREBASE_API_KEY=your_firebase_key
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_APP_ID=your_app_id
+
+# CoinGecko API (free tier, no key needed)
+VITE_COINGECKO_API_URL=https://api.coingecko.com/api/v3
+```
+
+## **🎯 Step 4: Build & Run**
+
+### Development Mode (with hot reload)
+```bash
+npm run dev
+```
+Access at: http://localhost:3000
+
+### Production Mode
+```bash
+npm run build
+npm start
+```
 
    ### PostgreSQL database config
       - DATABASE_URL=postgresql://neondb_owner:npg_m0JGs4tCgoTe@ep-tiny-fog-a6wso9s2.us-west-2.aws.neon.tech/neondb?sslmode=require

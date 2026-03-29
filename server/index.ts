@@ -73,6 +73,38 @@ function initDb() {
     )
   `);
 
+  // Stablecoin balances table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS stablecoin_balances (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER UNIQUE,
+      usdc_balance REAL DEFAULT 0.0,
+      usdt_balance REAL DEFAULT 0.0,
+      dai_balance REAL DEFAULT 0.0,
+      eurc_balance REAL DEFAULT 0.0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+  `);
+
+  // Stablecoin transactions table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS stablecoin_transactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      transaction_type TEXT,
+      from_currency TEXT,
+      to_currency TEXT,
+      from_amount REAL,
+      to_amount REAL,
+      exchange_rate REAL,
+      status TEXT DEFAULT 'completed',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+  `);
+
   // Insert default data if empty
   const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
   if (userCount.count === 0) {
@@ -260,6 +292,205 @@ app.post('/api/bluetooth/payment', (req, res) => {
   );
 
   res.json(transactionData);
+});
+
+// Stablecoin endpoints
+app.get('/api/stablecoin/rates', async (req, res) => {
+  try {
+    // Real-time prices from CoinGecko (free API, no key required)
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=usd-coin,tether,dai,euro-coin&vs_currencies=usd,inr,eur,gbp,jpy,aud,cad,chf,cny,sek&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&precision=8'
+    );
+    const prices = await response.json();
+
+    res.json({
+      usdc: prices['usd-coin'] || {},
+      usdt: prices['tether'] || {},
+      dai: prices['dai'] || {},
+      eurc: prices['euro-coin'] || {},
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching stablecoin rates:', error);
+    // Return cached rates on error
+    res.json({
+      error: 'Failed to fetch rates',
+      usdc: { usd: 1, inr: 83.5 },
+      usdt: { usd: 1, inr: 83.5 },
+      dai: { usd: 1, inr: 83.5 },
+      eurc: { eur: 1, usd: 1.08, inr: 90.0 }
+    });
+  }
+});
+
+app.get('/api/stablecoin/balance/:user_id', (req, res) => {
+  const userId = parseInt(req.params.user_id);
+  
+  let balance = db.prepare('SELECT * FROM stablecoin_balances WHERE user_id = ?').get(userId) as any;
+  
+  if (!balance) {
+    // Create balance entry if doesn't exist
+    db.prepare(`
+      INSERT INTO stablecoin_balances (user_id, usdc_balance, usdt_balance, dai_balance, eurc_balance)
+      VALUES (?, 0, 0, 0, 0)
+    `).run(userId);
+    
+    balance = {
+      usdc_balance: 0,
+      usdt_balance: 0,
+      dai_balance: 0,
+      eurc_balance: 0
+    };
+  }
+
+  res.json(balance);
+});
+
+app.post('/api/stablecoin/convert', (req, res) => {
+  const { user_id, from_currency, to_currency, from_amount, exchange_rate } = req.body;
+
+  if (!from_currency || !to_currency || !from_amount || !exchange_rate) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const to_amount = (from_amount * exchange_rate).toFixed(8);
+
+  // Get or create stablecoin balance
+  let balance = db.prepare('SELECT * FROM stablecoin_balances WHERE user_id = ?').get(user_id) as any;
+  
+  if (!balance) {
+    db.prepare(`
+      INSERT INTO stablecoin_balances (user_id, usdc_balance, usdt_balance, dai_balance, eurc_balance)
+      VALUES (?, 0, 0, 0, 0)
+    `).run(user_id);
+    balance = { usdc_balance: 0, usdt_balance: 0, dai_balance: 0, eurc_balance: 0 };
+  }
+
+  // Map currency codes to table columns
+  const currencyMap: any = {
+    'USDC': 'usdc_balance',
+    'USDT': 'usdt_balance',
+    'DAI': 'dai_balance',
+    'EURC': 'eurc_balance'
+  };
+
+  const fromCol = currencyMap[from_currency.toUpperCase()];
+  const toCol = currencyMap[to_currency.toUpperCase()];
+
+  if (!fromCol || !toCol) {
+    return res.status(400).json({ error: 'Invalid currency' });
+  }
+
+  // Check if user has enough balance in from_currency
+  if (balance[fromCol] < from_amount) {
+    return res.status(400).json({ error: 'Insufficient stablecoin balance' });
+  }
+
+  // Update balances
+  db.prepare(`
+    UPDATE stablecoin_balances 
+    SET ${fromCol} = ${fromCol} - ?, ${toCol} = ${toCol} + ?, updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = ?
+  `).run(from_amount, to_amount, user_id);
+
+  // Record transaction
+  db.prepare(`
+    INSERT INTO stablecoin_transactions (user_id, transaction_type, from_currency, to_currency, from_amount, to_amount, exchange_rate, status)
+    VALUES (?, 'conversion', ?, ?, ?, ?, ?, 'completed')
+  `).run(user_id, from_currency, to_currency, from_amount, to_amount, exchange_rate);
+
+  res.json({
+    success: true,
+    from_currency,
+    to_currency,
+    from_amount,
+    to_amount,
+    exchange_rate,
+    message: `Converted ${from_amount} ${from_currency} to ${to_amount} ${to_currency}`
+  });
+});
+
+app.post('/api/stablecoin/deposit', (req, res) => {
+  const { user_id, stablecoin, amount } = req.body;
+
+  if (!stablecoin || !amount || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid stablecoin or amount' });
+  }
+
+  const currencyMap: any = {
+    'USDC': 'usdc_balance',
+    'USDT': 'usdt_balance',
+    'DAI': 'dai_balance',
+    'EURC': 'eurc_balance'
+  };
+
+  const col = currencyMap[stablecoin.toUpperCase()];
+  if (!col) {
+    return res.status(400).json({ error: 'Invalid stablecoin' });
+  }
+
+  // Ensure balance entry exists
+  const existing = db.prepare('SELECT id FROM stablecoin_balances WHERE user_id = ?').get(user_id);
+  if (!existing) {
+    db.prepare(`
+      INSERT INTO stablecoin_balances (user_id, usdc_balance, usdt_balance, dai_balance, eurc_balance)
+      VALUES (?, 0, 0, 0, 0)
+    `).run(user_id);
+  }
+
+  // Add stablecoin
+  db.prepare(`
+    UPDATE stablecoin_balances 
+    SET ${col} = ${col} + ?, updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = ?
+  `).run(amount, user_id);
+
+  res.json({
+    success: true,
+    stablecoin,
+    amount,
+    message: `Deposited ${amount} ${stablecoin}`
+  });
+});
+
+app.post('/api/stablecoin/withdraw', (req, res) => {
+  const { user_id, stablecoin, amount } = req.body;
+
+  if (!stablecoin || !amount || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid stablecoin or amount' });
+  }
+
+  const currencyMap: any = {
+    'USDC': 'usdc_balance',
+    'USDT': 'usdt_balance',
+    'DAI': 'dai_balance',
+    'EURC': 'eurc_balance'
+  };
+
+  const col = currencyMap[stablecoin.toUpperCase()];
+  if (!col) {
+    return res.status(400).json({ error: 'Invalid stablecoin' });
+  }
+
+  const balance = db.prepare('SELECT * FROM stablecoin_balances WHERE user_id = ?').get(user_id) as any;
+
+  if (!balance || balance[col] < amount) {
+    return res.status(400).json({ error: `Insufficient ${stablecoin} balance` });
+  }
+
+  // Withdraw stablecoin
+  db.prepare(`
+    UPDATE stablecoin_balances 
+    SET ${col} = ${col} - ?, updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = ?
+  `).run(amount, user_id);
+
+  res.json({
+    success: true,
+    stablecoin,
+    amount,
+    message: `Withdrawn ${amount} ${stablecoin}`
+  });
 });
 
 // Serve static files
