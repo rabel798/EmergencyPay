@@ -8,6 +8,7 @@ const BottomNavigation: React.FC = () => {
   const navItems = [
     { path: '/', icon: 'ri-home-5-line', label: 'Home' },
     { path: '/qr-scan', icon: 'ri-qr-scan-line', label: 'Scan' },
+    { path: '/stablecoins', icon: 'ri-coin-line', label: 'Coins' },
     { path: '/transactions', icon: 'ri-history-line', label: 'History' },
     { path: '/profile', icon: 'ri-user-3-line', label: 'Profile' },
   ];

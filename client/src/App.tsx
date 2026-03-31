@@ -10,6 +10,7 @@ import Merchants from "@/pages/Merchants";
 import Profile from "@/pages/Profile";
 import DirectTransfer from "@/pages/DirectTransfer";
 import Insights from "@/pages/Insights";
+import StablecoinConverter from "@/pages/StablecoinConverter";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -57,6 +58,7 @@ function App() {
               <Route path="/merchants" component={Merchants} />
               <Route path="/profile" component={Profile} />
               <Route path="/insights" component={Insights} />
+              <Route path="/stablecoins" component={StablecoinConverter} />
               <Route path="/direct-transfer" component={DirectTransfer} />
               <Route path="/direct-transfer/:phone" component={DirectTransfer} />
               <Route component={NotFound} />

@@ -172,6 +172,38 @@ app.get('/api/user', (req, res) => {
   }
 });
 
+app.patch('/api/users/:id', (req, res) => {
+  const userId = parseInt(req.params.id);
+  const { balance, emergency_balance } = req.body;
+
+  try {
+    if (balance !== undefined) {
+      db.prepare('UPDATE users SET balance = ? WHERE id = ?').run(balance, userId);
+    }
+    if (emergency_balance !== undefined) {
+      db.prepare('UPDATE users SET emergency_balance = ? WHERE id = ?').run(emergency_balance, userId);
+    }
+
+    const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as any;
+    
+    if (updatedUser) {
+      res.json({
+        id: updatedUser.id,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        balance: updatedUser.balance,
+        emergency_balance: updatedUser.emergency_balance,
+        message: 'User updated successfully'
+      });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
 app.get('/api/merchants', (req, res) => {
   const merchants = db.prepare(`
     SELECT id, user_id, name, category, is_essential 
@@ -251,6 +283,17 @@ app.post('/api/system/network-status', (req, res) => {
   io.emit('network_status_changed', { status });
 
   res.json({ status });
+});
+
+// Toggle network status (for emergency mode)
+app.post('/api/system/toggle-network', (req, res) => {
+  const status = req.body.status || 'online';
+  saveConnectionStatus(status);
+
+  // Emit to all connected clients
+  io.emit('network_status_changed', { status });
+
+  res.json({ status, message: `Network status changed to: ${status}` });
 });
 
 app.post('/api/bluetooth/scan', (req, res) => {
